@@ -12,6 +12,8 @@ from waveshare_epd import epd7in5_V2
 import time
 from PIL import Image,ImageDraw,ImageFont
 import traceback
+import subprocess
+
 
 logging.basicConfig(level=logging.DEBUG)
 
