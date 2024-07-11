@@ -107,6 +107,7 @@ try:
     epd.sleep()
     
 except IOError as e:
+    epd.sleep()
     logging.error(e)
     
 except KeyboardInterrupt:    
