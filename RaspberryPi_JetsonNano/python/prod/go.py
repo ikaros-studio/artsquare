@@ -3,19 +3,22 @@
 import sys
 import os
 import logging
-from waveshare_epd import epd7in5_V2
-import time
 from PIL import Image
 import traceback
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Define paths
-picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
+# Add the directory containing waveshare_epd to the Python path
 libdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'lib')
 if os.path.exists(libdir):
     sys.path.append(libdir)
+
+try:
+    from waveshare_epd import epd7in5_V2
+except ImportError as e:
+    logging.error("Could not import epd7in5_V2 module. Please make sure the waveshare_epd library is installed and accessible.")
+    sys.exit(1)
 
 try:
     logging.info("epd7in5_V2 Demo")
@@ -26,7 +29,8 @@ try:
     epd.Clear()
 
     logging.info("read jpg file")
-    jpg_path = os.path.join(picdir, '../assets/img/cat.jpg')  # Replace with your JPG file path
+    # Define the path to the JPG image
+    jpg_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/img/cat.jpg')
     Himage = Image.open(jpg_path)
     
     # Convert the image to 1-bit color
