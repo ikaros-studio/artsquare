@@ -10,7 +10,7 @@ if os.path.exists(libdir):
 import logging
 from waveshare_epd import epd7in5_V2
 import time
-from PIL import Image,ImageDraw,ImageFont
+from PIL import Image, ImageDraw, ImageFont
 import traceback
 import subprocess
 
@@ -20,11 +20,13 @@ logging.basicConfig(level=logging.DEBUG)
 def generate_image(prompt, output_path):
     onnxstream_executable = '/home/pi/OnnxStream/src/build/sd'  # Path to the OnnxStream executable
     
+    logging.debug(f"Checking if OnnxStream executable exists at {onnxstream_executable}")
     # Check if the OnnxStream executable exists
     if not os.path.exists(onnxstream_executable):
         logging.error(f"OnnxStream executable not found: {onnxstream_executable}")
         return False
 
+    logging.debug(f"Checking execute permissions for {onnxstream_executable}")
     # Check if the file has execute permissions, if not, set them
     if not os.access(onnxstream_executable, os.X_OK):
         logging.info(f"Setting execute permissions for: {onnxstream_executable}")
@@ -41,6 +43,7 @@ def generate_image(prompt, output_path):
     # Set environment variables
     env = os.environ.copy()
 
+    logging.debug(f"Running OnnxStream with prompt: {prompt}")
     try:
         result = subprocess.run([
             onnxstream_executable,
@@ -57,6 +60,7 @@ def generate_image(prompt, output_path):
         logging.error(f"Failed to generate image: {e}")
         logging.error(f"Error output: {e.stderr}")
         return False
+    logging.info(f"Image generated successfully: {output_path}")
     return True
 
 try:
@@ -80,6 +84,10 @@ try:
     # Generate the image
     prompt = "a beautiful scenery with mountains and a river"
     output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/img/generated_image.png')
+    
+    logging.info(f"Starting image generation with prompt: {prompt}")
+    logging.info(f"Output path for generated image: {output_path}")
+    
     if generate_image(prompt, output_path):
         logging.info("Displaying generated image")
         Himage = Image.open(output_path)
@@ -103,5 +111,6 @@ except IOError as e:
     
 except KeyboardInterrupt:    
     logging.info("ctrl + c:")
+    epd.sleep()
     epd7in5_V2.epdconfig.module_exit(cleanup=True)
     exit()
