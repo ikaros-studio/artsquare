@@ -29,5 +29,7 @@ cmake -DMAX_SPEED=ON -DOS_LLM=OFF -DOS_CUDA=OFF -DXNNPACK_DIR=~/XNNPACK ..
 cmake --build . --config Release
 
 
+## Run 
+
 
 
