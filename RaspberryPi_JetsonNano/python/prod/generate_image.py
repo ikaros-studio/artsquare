@@ -80,13 +80,20 @@ try:
     text_width, text_height = draw.textsize(text, font)
     draw.text(((epd.width - text_width) // 2, (epd.height - text_height) // 2), text, font=font, fill=0)
     epd.display(epd.getbuffer(Himage))
+    
+    logging.info("Putting display to sleep during image generation")
+    epd.sleep()
 
     # Generate the image
-    prompt = "a beautiful scenery with mountains and a river"
+    prompt = "a drawing of waves, japanese style"
     output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/img/generated_image.png')
     
     logging.info(f"Starting image generation with prompt: {prompt}")
     logging.info(f"Output path for generated image: {output_path}")
+    
+    # Before displaying the generated image
+    logging.info("Waking up the display")
+    epd.init()
     
     if generate_image(prompt, output_path):
         logging.info("Displaying generated image")
@@ -101,7 +108,6 @@ try:
 
     logging.info("Clear...")
     epd.init()
-    epd.Clear()
 
     logging.info("Goto Sleep...")
     epd.sleep()
