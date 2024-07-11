@@ -4,10 +4,6 @@ import sys
 import os
 import subprocess
 import logging
-libdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'lib')
-if os.path.exists(libdir):
-    sys.path.append(libdir)
-    
 from waveshare_epd import epd7in5_V2
 import time
 from PIL import Image, ImageDraw, ImageFont
@@ -16,19 +12,44 @@ import traceback
 logging.basicConfig(level=logging.DEBUG)
 
 def generate_image(prompt, output_path):
+    onnxstream_executable = '/home/pi/OnnxStream/src/build/sd'  # Path to the OnnxStream executable
+    
+    # Check if the OnnxStream executable exists
+    if not os.path.exists(onnxstream_executable):
+        logging.error(f"OnnxStream executable not found: {onnxstream_executable}")
+        return False
+
+    # Check if the file has execute permissions, if not, set them
+    if not os.access(onnxstream_executable, os.X_OK):
+        logging.info(f"Setting execute permissions for: {onnxstream_executable}")
+        try:
+            os.chmod(onnxstream_executable, 0o755)
+        except Exception as e:
+            logging.error(f"Failed to set execute permissions: {e}")
+            return False
+
+    # Get current working directory
+    cwd = os.getcwd()
+    logging.info(f"Current working directory: {cwd}")
+
+    # Set environment variables
+    env = os.environ.copy()
+
     try:
-        # Adjust the command to match your OnnxStream setup
-        subprocess.run([
-            './sd',  # Path to the OnnxStream executable
+        result = subprocess.run([
+            onnxstream_executable,
             '--turbo',
             '--models-path', '/home/pi/stable-diffusion-models/stable-diffusion-xl-turbo-1.0-onnxstream',
             '--prompt', prompt,
             '--steps', '1',
             '--output', output_path,
             '--rpi'
-        ], check=True)
+        ], check=True, env=env, capture_output=True, text=True)
+        logging.info(f"Subprocess output: {result.stdout}")
+        logging.error(f"Subprocess stderr: {result.stderr}")
     except subprocess.CalledProcessError as e:
         logging.error(f"Failed to generate image: {e}")
+        logging.error(f"Error output: {e.stderr}")
         return False
     return True
 
@@ -36,7 +57,7 @@ try:
     logging.info("epd7in5_V2 Demo")
     epd = epd7in5_V2.EPD()
     
-    logging.info("init and Clear")
+    logging.info("Init and Clear")
     epd.init()
     epd.Clear()
 
