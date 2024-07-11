@@ -19,10 +19,13 @@ def generate_image(prompt, output_path):
     try:
         # Adjust the command to match your OnnxStream setup
         subprocess.run([
-            './onnxstream',  # Path to the OnnxStream executable
+            './sd',  # Path to the OnnxStream executable
+            '--turbo',
+            '--models-path', '/home/pi/stable-diffusion-models/stable-diffusion-xl-turbo-1.0-onnxstream',
             '--prompt', prompt,
+            '--steps', '1',
             '--output', output_path,
-            '--rpi-lowmem'  # Use low memory mode for Raspberry Pi Zero 2
+            '--rpi'
         ], check=True)
     except subprocess.CalledProcessError as e:
         logging.error(f"Failed to generate image: {e}")
@@ -54,7 +57,7 @@ try:
         logging.info("Displaying generated image")
         Himage = Image.open(output_path)
         Himage = Himage.convert('1')
-        Himage = Himage.resize((epd.width, epd.height), Image.ANTIALIAS)
+        Himage = Himage.resize((epd.width, epd.height), Image.ANTIALIAS)  # Resize to fit the display
         epd.display(epd.getbuffer(Himage))
     else:
         logging.error("Failed to generate image")
