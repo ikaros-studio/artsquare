@@ -25,7 +25,7 @@ try:
 
     logging.info("read jpg file")
     # Define the path to the JPG image
-    jpg_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/img/cat.jpg')
+    jpg_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../assets/img/astronaut.png')
     Himage = Image.open(jpg_path)
     
     # Convert the image to 1-bit color
