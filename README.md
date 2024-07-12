@@ -1,42 +1,76 @@
-﻿# 说明 explain
-Development 分支用于存放用户的提交的修改代码，经验证后，我们将移植到主分支中；非常感谢您对我们的支持</br>
-The Development branch is used to store the modified code submitted by users. After verification, we will migrate it to the main branch. Thank you very much for your support 
+# 1. Install PI dependancies
+# 2. Install Waveshare Dependencies
 
-# e-Paper  
-waveshare electronics</br>
-![waveshare_logo.png](waveshare_logo.png)
+# 3. Install ONNX Stream
 
-# 说明 explain
-这个开发分支用于存放用户的提交的修改代码，经验证后，我们将移植到主分支中；非常感谢您对我们的支持
+## Install XNNPACK
 
-This development branch is used to store the changes committed by users. After verification, we will migrate them to the main branch. Thank you very much for your support
+To install XNNPACK, follow these steps:
 
-## 中文:  
-Jetson Nano、Raspberry Pi、Arduino、STM32例程</br>
-* RaspberryPi_JetsonNano  
-    > C
-    > Python 
-* Arduino:  
-    > Arduino UNO  
-* STM32:  
-    > STM32F103ZET6 
-    
-更多资料请在官网上搜索:  </br>
-http://www.waveshare.net
+1. Check if `cmake` is installed by running the command `$sudo apt-get install cmake`.
+
+2. Build XNNPACK:
+    ```
+    $cd ~/XNNPACK
+    mkdir build
+    cd build
+    cmake -DXNNPACK_BUILD_TESTS=OFF -DXNNPACK_BUILD_BENCHMARKS=OFF ..
+    cmake --build . --config Release
+    ```
+
+## Install OnnxStream
+
+To install OnnxStream, follow these steps:
+
+1. Clone the OnnxStream repository:
+    ```
+    cd ~
+    git clone https://github.com/vitoplantamura/OnnxStream.git
+    cd OnnxStream/src
+    mkdir build
+    cd build
+    ```
+
+2. Configure the build with XNNPACK:
+    ```
+    cmake -DMAX_SPEED=ON -DOS_LLM=OFF -DOS_CUDA=OFF -DXNNPACK_DIR=~/XNNPACK ..
+    ```
+
+3. Build OnnxStream:
+    ```
+    cmake --build . --config Release
+    ```
+
+## Run
+
+To run the application, follow the instructions provided in the documentation.
 
 
-## English:  
-Jetson Nano、Raspberry Pi、Arduino、STM32 Demo:  </br>
-* RaspberryPi_JetsonNano:  
-    > C
-    > Python
-* Arduino:  
-    > Arduino UNO  
-* STM32:  
-    > STM32F103ZET6 
-    
-For more information, please search on the official website:   </br>
-https://www.waveshare.com
+
+## add cron Job
+
+0 * * * * /usr/bin/python3 /path/to/your/script.py
 
 
+## Handling Power Interruptions:
+Create a startup service to run the script immediately upon boot. Create a systemd service file:
 
+[Unit]
+Description=E-Ink Frame Image Generator
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /path/to/your/script.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Save this file as /etc/systemd/system/eink-image-generator.service and enable it:
+
+
+Save this file as /etc/systemd/system/eink-image-generator.service and enable it:
+
+sh
+Copy code
+sudo systemctl enable eink-image-generator.service
+sudo systemctl start eink-image-generator.service

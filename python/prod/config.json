@@ -1,0 +1,7 @@
+{
+    "interval_minutes": 1440,
+    "prompt": "A beautiful sunset over the mountains.",
+    "model_path": "/home/pi/stable-diffusion-models/stable-diffusion-xl-turbo-1.0-onnxstream",
+    "output_path": "/home/pi/assets/img/generated_image.png"
+  }
+  
