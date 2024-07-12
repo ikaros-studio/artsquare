@@ -70,55 +70,64 @@ def display_image(epd, output_path):
     Himage = Himage.resize((epd.width, epd.height), Image.ANTIALIAS)
     epd.display(epd.getbuffer(Himage))
 
-try:
-    logging.info("epd7in5_V2 Demo")
-    epd = epd7in5_V2.EPD()
+def main():
+    try:
+        logging.info("epd7in5_V2 Demo")
+        epd = epd7in5_V2.EPD()
 
-    logging.info("Init and Clear")
-    epd.init()
-    epd.Clear()
+        logging.info("Init and Clear")
+        epd.init()
+        epd.Clear()
 
-    logging.info("Displaying generating message")
-    Himage = Image.new('1', (epd.width, epd.height), 255)
-    draw = ImageDraw.Draw(Himage)
-    font = ImageFont.load_default()
-    text = "Generating something ..."
-    text_width, text_height = draw.textsize(text, font)
-    draw.text(((epd.width - text_width) // 2, (epd.height - text_height) // 2), text, font=font, fill=0)
-    epd.display(epd.getbuffer(Himage))
+        logging.info("Displaying generating message")
+        Himage = Image.new('1', (epd.width, epd.height), 255)
+        draw = ImageDraw.Draw(Himage)
+        font = ImageFont.load_default()
+        text = "Generating something ..."
+        text_width, text_height = draw.textsize(text, font)
+        draw.text(((epd.width - text_width) // 2, (epd.height - text_height) // 2), text, font=font, fill=0)
+        epd.display(epd.getbuffer(Himage))
+        
+        logging.info("Putting display to sleep during image generation")
+        epd.sleep()
+
+        prompt = config['prompt']
+        output_path = config['output_path']
+        model_path = config['model_path']
+        interval = config.get('interval', 60)  # Default to 60 minutes if not specified
+
+        logging.info(f"Starting image generation with prompt: {prompt}")
+        logging.info(f"Output path for generated image: {output_path}")
+        
+        logging.info("Waking up the display")
+        epd.init()
+        
+        if generate_image(prompt, output_path, model_path):
+            display_image(epd, output_path)
+        else:
+            logging.error("Failed to generate image")
+
+        time.sleep(2)
+
+        logging.info("Clear...")
+        epd.init()
+
+        logging.info("Goto Sleep...")
+        epd.sleep()
+        
+        # Put the Raspberry Pi to sleep for the specified interval
+        logging.info(f"Sleeping for {interval} minutes")
+        time.sleep(interval * 60)
     
-    logging.info("Putting display to sleep during image generation")
-    epd.sleep()
+    except IOError as e:
+        epd.sleep()
+        logging.error(e)
+        
+    except KeyboardInterrupt:    
+        logging.info("ctrl + c:")
+        epd.sleep()
+        epd7in5_V2.epdconfig.module_exit(cleanup=True)
+        exit()
 
-    prompt = config['prompt']
-    output_path = config['output_path']
-    model_path = config['model_path']
-
-    logging.info(f"Starting image generation with prompt: {prompt}")
-    logging.info(f"Output path for generated image: {output_path}")
-    
-    logging.info("Waking up the display")
-    epd.init()
-    
-    if generate_image(prompt, output_path, model_path):
-        display_image(epd, output_path)
-    else:
-        logging.error("Failed to generate image")
-
-    time.sleep(2)
-
-    logging.info("Clear...")
-    epd.init()
-
-    logging.info("Goto Sleep...")
-    epd.sleep()
-    
-except IOError as e:
-    epd.sleep()
-    logging.error(e)
-    
-except KeyboardInterrupt:    
-    logging.info("ctrl + c:")
-    epd.sleep()
-    epd7in5_V2.epdconfig.module_exit(cleanup=True)
-    exit()
+if __name__ == "__main__":
+    main()
